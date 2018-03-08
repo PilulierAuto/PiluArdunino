@@ -1,3 +1,4 @@
+
 /*************************
  * Code.ino
  * Fichier principal
@@ -10,6 +11,13 @@
 #include <DS1302RTC.h>
 #include <Time.h>
 #include "def.h"
+#include <Wire.h>
+#include "rgb_lcd.h"
+#define PinA 2    //  1ere sortie du codeur
+#define PinB 3    //  2e sortie du codeur
+
+volatile boolean mouvement;
+volatile boolean up;
 
 /* Moteurs (l298n) M1:Rotation plateau M2:Montée médicaments*/
 const int M1HorPin = 7;   //IN1
@@ -42,6 +50,19 @@ int heure = 0;
 int Id = 0;
 //short NbMedAct=0, NbMedVol=0;
 unsigned short MedSeq[5];
+/*écran */
+ int Pos = 0;
+byte Cust1 [8] = {0x1B, 0x13, 0x1b, 0x1b, 0x1b, 0x1b, 0x11, 0x1f};
+
+byte Cust2 [8] = {0b10001, 0b01110, 0b11110, 0b11101, 0b11011, 0b10111, 0b00000, 0b11111};
+
+byte Cust3 [8] = {0b10001, 0b01110, 0b11110, 0b10001, 0b11110, 0b11110, 0b01110, 0b10001};
+
+byte Cust4 [8] = {0b11101, 0b11001, 0b10101, 0b01101, 0b00000, 0b11101, 0b11101, 0b11101};
+
+byte Cust5 [8] = {0b00000, 0b01111, 0b01111, 0b00001, 0b11110, 0b11110, 0b01110, 0b10001};
+
+rgb_lcd Lcd;
 
 void initRTC(); //initialisation du RTC
 void RotPlat(); //rotation du plateau (un cran)
@@ -49,17 +70,16 @@ void AddMed(int nbr); //chute d'un médicament
 void RempTab();
 
 void setup() {
-  
+  Serial.begin(9600);
   initRTC();
   pinMode(IREmmPin, OUTPUT);
-  
-
+  Lcd.begin(16,2);
 }
 
 void loop() {
-  while(analogRead(BtnPin)!=0){ //ou bluetooth
-    delay(1000);
-  }
+//  while(analogRead(BtnPin)!=0){ //ou bluetooth
+//    delay(1000);
+//  }
   Id = AqPers();
   EEPROM.get(0, Med);
   RempTab();
@@ -67,6 +87,20 @@ void loop() {
    AddMed(MedSeq[PosPlat]);
    RotPlat();        
   }
+
+  //------------------------------*MENU*----------------------------\
+  lcd.createChar(0, Cust1);
+  lcd.createChar(1, Cust2);
+  lcd.createChar(2, Cust3);
+  lcd.createChar(3, Cust4);
+  lcd.createChar(4, Cust5);
+  pinMode(PinA, INPUT_PULLUP);
+  pinMode(PinB, INPUT_PULLUP);
+  digitalWrite (PinA, HIGH);
+  digitalWrite (PinB, HIGH);
+  attachInterrupt (0, routineInterruption, FALLING); // interruption sur front descendant
+  Serial.println("Veuillez tourner le bouton");
+
 }
 
 void initRTC(){
@@ -110,6 +144,12 @@ void AddMed(int Nbr){
   digitalWrite(M2HorPin, HIGH); //arrêt moteur (frein)
   delay(100);
 
+  digitalWrite(M2TrigPin, LOW);
+  delay(1000);
+
+  digitalWrite(M2TrigPin, HIGH);
+  delay(100);
+  
   analogWrite(M2Pwm, 0);       //arrêt moteur  
   digitalWrite(M2HorPin, LOW);
   digitalWrite(M2TrigPin, LOW);
@@ -120,9 +160,37 @@ void AddMed(int Nbr){
 }
 
 int AqPers(){
-  //CSQG
+  Lcd.print("Bonjour");
+  while(!Serial.available() > 0){
+    if (mouvement )  {      // on a détecté une rotation du bouton
+    if (up)
+      Pos++;
+    else
+      Pos--;
+    mouvement = false;
+  }
+    Serial.println (valeur);
+    Affiche();
+  delay(250);
+    }
+    Id = Serial.read()-48;
+    struct Med temp;
+    Serial.println(Id);
+    EEPROM.get(sizeof(Med)*Id,temp);
+    String Nom = temp.Nom;
+    Lcd.setCursor(0,2);
+    Lcd.print(temp.Nom);
+  return Id;
 }
-
+void Affiche(void) {
+  lcd.clear();
+  lcd.print("Indentifiez vous ?");
+  lcd.setCursor(0, 1);
+  lcd.print("1  2  3  4  5");
+  lcd.setCursor((3 * Pos), 1);
+  lcd.printByte(Pos);
+  Serial.print(Pos);
+}
 void RempTab(){
   RTC.read(tm);
   int i=0;

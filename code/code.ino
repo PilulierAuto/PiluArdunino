@@ -1,10 +1,9 @@
-
 /*************************
  * Code.ino
  * Fichier principal
  * 
  * Création : 27/12/17
- * Dernière modification : 6/1/18
+ * Dernière modification : 8/3/18
  */
 
 #include <EEPROM.h>
@@ -12,7 +11,9 @@
 #include <Time.h>
 #include "def.h"
 #include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 #include "rgb_lcd.h"
+
 #define PinA 2    //  1ere sortie du codeur
 #define PinB 3    //  2e sortie du codeur
 
@@ -51,7 +52,7 @@ int Id = 0;
 //short NbMedAct=0, NbMedVol=0;
 unsigned short MedSeq[5];
 /*écran */
- int Pos = 0;
+int Pos = 0;
 byte Cust1 [8] = {0x1B, 0x13, 0x1b, 0x1b, 0x1b, 0x1b, 0x11, 0x1f};
 
 byte Cust2 [8] = {0b10001, 0b01110, 0b11110, 0b11101, 0b11011, 0b10111, 0b00000, 0b11111};
@@ -68,12 +69,24 @@ void initRTC(); //initialisation du RTC
 void RotPlat(); //rotation du plateau (un cran)
 void AddMed(int nbr); //chute d'un médicament
 void RempTab();
+void ActuRTC();
+void routineInterruption();
 
 void setup() {
   Serial.begin(9600);
   initRTC();
   pinMode(IREmmPin, OUTPUT);
   Lcd.begin(16,2);
+  digitalWrite (PinA, HIGH);
+  digitalWrite (PinB, HIGH);
+  attachInterrupt (0, routineInterruption, FALLING);
+  
+   //------------------------------*MENU*----------------------------\
+  Lcd.createChar(0, Cust1);
+  Lcd.createChar(1, Cust2);
+  Lcd.createChar(2, Cust3);
+  Lcd.createChar(3, Cust4);
+  Lcd.createChar(4, Cust5);
 }
 
 void loop() {
@@ -87,19 +100,6 @@ void loop() {
    AddMed(MedSeq[PosPlat]);
    RotPlat();        
   }
-
-  //------------------------------*MENU*----------------------------\
-  lcd.createChar(0, Cust1);
-  lcd.createChar(1, Cust2);
-  lcd.createChar(2, Cust3);
-  lcd.createChar(3, Cust4);
-  lcd.createChar(4, Cust5);
-  pinMode(PinA, INPUT_PULLUP);
-  pinMode(PinB, INPUT_PULLUP);
-  digitalWrite (PinA, HIGH);
-  digitalWrite (PinB, HIGH);
-  attachInterrupt (0, routineInterruption, FALLING); // interruption sur front descendant
-  Serial.println("Veuillez tourner le bouton");
 
 }
 
@@ -169,7 +169,6 @@ int AqPers(){
       Pos--;
     mouvement = false;
   }
-    Serial.println (valeur);
     Affiche();
   delay(250);
     }
@@ -183,12 +182,12 @@ int AqPers(){
   return Id;
 }
 void Affiche(void) {
-  lcd.clear();
-  lcd.print("Indentifiez vous ?");
-  lcd.setCursor(0, 1);
-  lcd.print("1  2  3  4  5");
-  lcd.setCursor((3 * Pos), 1);
-  lcd.printByte(Pos);
+  Lcd.clear();
+  Lcd.print("Indentifiez vous ?");
+  Lcd.setCursor(0, 1);
+  Lcd.print("1  2  3  4  5");
+  Lcd.setCursor((3 * Pos), 1);
+  //Lcd.printByte(Pos); /!\ A VERIFIER /!\
   Serial.print(Pos);
 }
 void RempTab(){
@@ -209,6 +208,25 @@ void RempTab(){
       MedSeq[i]=Med[Id].soir[i];
     } 
   }   
+}
+
+void routineInterruption(){
+  if (digitalRead(PinA))
+    up = digitalRead(PinB);
+  else
+    up = !digitalRead(PinB);
+  mouvement = true;
+}
+
+void ActuRTC(){
+  int Hr_temp, Mn_temp;
+  Serial.print("HrBlu"); //signal pour demander l'heure
+  Hr_temp=Serial.read();
+  Mn_temp=Serial.read();
+  RTC.read(tm);
+  if(tm.Hour!=Hr_temp || tm.Minute!=Mn_temp){
+    setTime(Hr_temp, Mn_temp, tm.Second, tm.Day, tm.Month, tm.Year);
+  }
 }
 
 

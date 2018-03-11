@@ -69,7 +69,7 @@ void initRTC(); //initialisation du RTC
 void RotPlat(); //rotation du plateau (un cran)
 void AddMed(int nbr); //chute d'un médicament
 void RempTab();
-void ActuRTC();
+void ActuRTC(); //syncronisation temps avec bluetooth
 void routineInterruption();
 
 void setup() {
@@ -81,7 +81,7 @@ void setup() {
   digitalWrite (PinB, HIGH);
   attachInterrupt (0, routineInterruption, FALLING);
   
-   //------------------------------*MENU*----------------------------\
+   //------------------------------*MENU*----------------------------
   Lcd.createChar(0, Cust1);
   Lcd.createChar(1, Cust2);
   Lcd.createChar(2, Cust3);
@@ -219,13 +219,16 @@ void routineInterruption(){
 }
 
 void ActuRTC(){
-  int Hr_temp, Mn_temp;
+  int Hr_temp=0, Mn_temp=0;
   Serial.print("HrBlu"); //signal pour demander l'heure
-  Hr_temp=Serial.read();
-  Mn_temp=Serial.read();
+  while(Hr_temp==0)
+    Hr_temp=Serial.parseInt();
+  while(Mn_temp==0)
+    Mn_temp=Serial.parseInt();
   RTC.read(tm);
   if(tm.Hour!=Hr_temp || tm.Minute!=Mn_temp){
     setTime(Hr_temp, Mn_temp, tm.Second, tm.Day, tm.Month, tm.Year);
+    RTC.set(now());
   }
 }
 

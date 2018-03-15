@@ -30,7 +30,7 @@ const int M2TrigPin = 10; //IN4
 const int M2Pwm = 6;      //ENB
 
 /*Diodes IR*/
-const int IREmmPin = 12, IRRecPin = A0;
+const int IREmmPin = 13, IRRecPin = A0;
 
 /*Capteur contact*/
 const int CptCtcPin = A3; //provisoire
@@ -39,7 +39,7 @@ const int CptCtcPin = A3; //provisoire
 const int BtnPin = A2; //provisoire
 
 /*DS1302 RTC*/
-const int CEPin = 4, IOPin = 3, SLCKPin = 2;
+const int CEPin = 4, IOPin = 12, SLCKPin = 11;
 DS1302RTC RTC(CEPin, IOPin, SLCKPin);
 tmElements_t tm;
 
@@ -203,12 +203,18 @@ void RempTab(){
       MedSeq[i]=Med[Id].midi[i];
     }
   }
-  else{
+  else if(tm.Hour<21){
    for(i=0;i<=4;i++){
       MedSeq[i]=Med[Id].soir[i];
     } 
-  }   
+  }
+  else{
+   for(i=0;i<=4;i++){
+      MedSeq[i]=Med[Id].nuit[i]; 
+   }
+  } 
 }
+
 
 void routineInterruption(){
   if (digitalRead(PinA))

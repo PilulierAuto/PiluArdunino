@@ -33,11 +33,10 @@ const int M2Pwm = 6;      //ENB
 const int IREmmPin = 13, IRRecPin = A0;
 
 /*Capteur contact*/
-const int CptCtcPin = A3; //provisoire
+const int CptCtcPin = A2; 
 
 /*Boutons*/
-const int BtnPin = A2; //provisoire
-
+const int BtnPin = A1; 
 /*DS1302 RTC*/
 const int CEPin = 4, IOPin = 12, SLCKPin = 11;
 DS1302RTC RTC(CEPin, IOPin, SLCKPin);
@@ -65,16 +64,16 @@ byte Cust5 [8] = {0b00000, 0b01111, 0b01111, 0b00001, 0b11110, 0b11110, 0b01110,
 
 rgb_lcd Lcd;
 
-void initRTC(); //initialisation du RTC
-void RotPlat(); //rotation du plateau (un cran)
-void AddMed(int nbr); //chute d'un médicament
+void RotPlat(); //rotation du plateau
+void AddMed(int nbr); //chute des médicaments
 void RempTab();
 void ActuRTC(); //syncronisation temps avec bluetooth
 void routineInterruption();
+int AqPers();
+boolean Fin(); //vérifie si les médicaments ont été distribués
 
 void setup() {
   Serial.begin(9600);
-  initRTC();
   pinMode(IREmmPin, OUTPUT);
   Lcd.begin(16,2);
   digitalWrite (PinA, HIGH);
@@ -96,34 +95,102 @@ void loop() {
   Id = AqPers();
   EEPROM.get(0, Med);
   RempTab();
-  while(PosPlat<=4){
+  boolean fin=0;
+  while(fin==0){
+   fin=Fin();
    AddMed(MedSeq[PosPlat]);
    RotPlat();        
   }
 
 }
 
-void initRTC(){
-  
-}
 
 void RotPlat(){
+  boolean fin=Fin();
   int temp = 0;
   analogWrite(M1Pwm, 42); //valeur à déterminer
-  digitalWrite(M1HorPin, LOW);
-  digitalWrite(M1TrigPin, HIGH);
-  delay(100);
+  if((MedSeq[(PosPlat+1)%5]!=0 && PosPlat+1<=4) || fin&&PosPlat==4){
+    digitalWrite(M1HorPin, HIGH);
+    digitalWrite(M1TrigPin, LOW);
+    delay(100);
   
-  do{
-    temp = analogRead(CptCtcPin); 
-  }while(temp<42); //valeur à déterminer
+    do{
+      temp = digitalRead(CptCtcPin); 
+    }while(temp==0);
   
-  digitalWrite(M1HorPin, HIGH); //arrêt moteur (frein)
-  delay(100);
+    digitalWrite(M1HorPin, HIGH); //arrêt moteur (frein)
+    delay(100);
 
-  analogWrite(M1Pwm, 0);       //arrêt moteur  
-  digitalWrite(M1HorPin, LOW);
-  digitalWrite(M1TrigPin, LOW);
+    analogWrite(M1Pwm, 0);       //arrêt moteur  
+    digitalWrite(M1HorPin, LOW);
+    digitalWrite(M1TrigPin, LOW);
+    if(PosPlat!=4)
+      PosPlat++;
+    else
+      PosPlat=0;
+  }
+  else if(MedSeq[(PosPlat+2)%5]!=0 && PosPlat+2<=4 || fin&&PosPlat==3){
+    digitalWrite(M1HorPin, HIGH);
+    digitalWrite(M1TrigPin, LOW);
+    delay(100);
+  
+    do{
+      temp = digitalRead(CptCtcPin); 
+    }while(temp==0);
+    delay(200);
+    do{
+      temp = digitalRead(CptCtcPin); 
+    }while(temp==0);
+    
+  
+    digitalWrite(M1HorPin, HIGH); //arrêt moteur (frein)
+    delay(100);
+
+    analogWrite(M1Pwm, 0);       //arrêt moteur  
+    digitalWrite(M1HorPin, LOW);
+    digitalWrite(M1TrigPin, LOW);
+    PosPlat+=2;
+  }
+    else if(MedSeq[(PosPlat+3)%5]!=0 && PosPlat+3<=4 || fin&&PosPlat==2){
+    digitalWrite(M1TrigPin, HIGH);
+    digitalWrite(M1HorPin, LOW);
+    delay(100);
+  
+    do{
+      temp = digitalRead(CptCtcPin); 
+    }while(temp==0);
+    
+    digitalWrite(M1TrigPin, HIGH); //arrêt moteur (frein)
+    delay(100);
+
+    analogWrite(M1Pwm, 0);       //arrêt moteur  
+    digitalWrite(M1HorPin, LOW);
+    digitalWrite(M1TrigPin, LOW);
+    PosPlat+=3;
+  }
+  else if(MedSeq[(PosPlat+4)%5]!=0 && PosPlat+4<=4 || fin&&PosPlat==1){
+    digitalWrite(M1TrigPin, HIGH);
+    digitalWrite(M1HorPin, LOW);
+    delay(100);
+  
+    do{
+      temp = digitalRead(CptCtcPin); 
+    }while(temp==0);
+    delay(200);
+    do{
+      temp = digitalRead(CptCtcPin); 
+    }while(temp==0);
+    
+  
+    digitalWrite(M1TrigPin, HIGH); //arrêt moteur (frein)
+    delay(100);
+
+    analogWrite(M1Pwm, 0);       //arrêt moteur  
+    digitalWrite(M1HorPin, LOW);
+    digitalWrite(M1TrigPin, LOW);
+    PosPlat+=4;
+  } 
+  PosPlat=PosPlat%5;
 }
 
 void AddMed(int Nbr){
@@ -148,21 +215,18 @@ void AddMed(int Nbr){
   delay(1000);
 
   digitalWrite(M2TrigPin, HIGH);
-  delay(100);
+  delay(1000);
   
   analogWrite(M2Pwm, 0);       //arrêt moteur  
   digitalWrite(M2HorPin, LOW);
   digitalWrite(M2TrigPin, LOW);
-  if(PosPlat!=4)
-   PosPlat++;
-  else
-   PosPlat=0;
+  MedSeq[PosPlat]=0;
 }
 
 int AqPers(){
   Lcd.print("Bonjour");
   while(!Serial.available() > 0){
-    if (mouvement )  {      // on a détecté une rotation du bouton
+    if (mouvement)  {      // on a détecté une rotation du bouton
     if (up)
       Pos++;
     else
@@ -237,5 +301,24 @@ void ActuRTC(){
     RTC.set(now());
   }
 }
+
+boolean Fin(){
+  int i=0;
+    for(i=0; i<5; i++)
+    {
+        if(MedSeq[i]!=0)
+        return 0;
+    }
+    return 1; 
+}
+
+
+
+
+
+
+
+
+
 
 

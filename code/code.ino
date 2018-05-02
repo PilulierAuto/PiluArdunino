@@ -108,7 +108,7 @@ void loop() {
 void RotPlat(){
   boolean fin=Fin();
   int temp = 0;
-  analogWrite(M1Pwm, 42); //valeur à déterminer
+  analogWrite(M1Pwm, 64); 
   if((MedSeq[(PosPlat+1)%5]!=0 && PosPlat+1<=4) || fin&&PosPlat==4){
     digitalWrite(M1HorPin, HIGH);
     digitalWrite(M1TrigPin, LOW);

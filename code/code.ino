@@ -52,15 +52,7 @@ int Id = 0;
 unsigned short MedSeq[5];
 /*écran */
 int Pos = 0;
-byte Cust1 [8] = {0x1B, 0x13, 0x1b, 0x1b, 0x1b, 0x1b, 0x11, 0x1f};
 
-byte Cust2 [8] = {0b10001, 0b01110, 0b11110, 0b11101, 0b11011, 0b10111, 0b00000, 0b11111};
-
-byte Cust3 [8] = {0b10001, 0b01110, 0b11110, 0b10001, 0b11110, 0b11110, 0b01110, 0b10001};
-
-byte Cust4 [8] = {0b11101, 0b11001, 0b10101, 0b01101, 0b00000, 0b11101, 0b11101, 0b11101};
-
-byte Cust5 [8] = {0b00000, 0b01111, 0b01111, 0b00001, 0b11110, 0b11110, 0b01110, 0b10001};
 
 rgb_lcd Lcd;
 
@@ -69,6 +61,7 @@ void AddMed(int nbr); //chute des médicaments
 void RempTab();
 void ActuRTC(); //syncronisation temps avec bluetooth
 void routineInterruption();
+void ActuPos();
 int AqPers();
 boolean Fin(); //vérifie si les médicaments ont été distribués
 
@@ -102,6 +95,18 @@ void loop() {
    RotPlat();        
   }
 
+}
+
+void SerialEvent(){
+   byte ReadVar = Serial.read();
+   switch(ReadVar){
+    case Mes_Actu:
+      ActuRTC();
+      break;
+    case Mes_DemPos:
+      ActuPos();
+      break;
+   }
 }
 
 
@@ -210,11 +215,11 @@ void RotPlat(){
 void AddMed(int Nbr){
   int i = 0, j = 0, ref = 0;
 
-  analogWrite(M2Pwm, 42);    //val à det
+  analogWrite(M2Pwm, 255); 
   digitalWrite(M2HorPin, LOW);
   digitalWrite(M2TrigPin, HIGH);
   digitalWrite(IREmmPin, HIGH);
-  ref = analogRead(IRRecPin) -50; //val à det
+  ref = analogRead(IRRecPin) -50; 
 
   while(i<Nbr){
     do{
@@ -238,37 +243,6 @@ void AddMed(int Nbr){
   MedSeq[PosPlat]=0;
 }
 
-int AqPers(){
-  Lcd.print("Bonjour");
-  while(!Serial.available() > 0){
-    if (mouvement)  {      // on a détecté une rotation du bouton
-    if (up)
-      Pos++;
-    else
-      Pos--;
-    mouvement = false;
-  }
-    Affiche();
-  delay(250);
-    }
-    Id = Serial.read()-48;
-    struct Med temp;
-    Serial.println(Id);
-    EEPROM.get(sizeof(Med)*Id,temp);
-    String Nom = temp.Nom;
-    Lcd.setCursor(0,2);
-    Lcd.print(temp.Nom);
-  return Id;
-}
-void Affiche(void) {
-  Lcd.clear();
-  Lcd.print("Indentifiez vous ?");
-  Lcd.setCursor(0, 1);
-  Lcd.print("1  2  3  4  5");
-  Lcd.setCursor((3 * Pos), 1);
-  //Lcd.printByte(Pos); /!\ A VERIFIER /!\
-  Serial.print(Pos);
-}
 void RempTab(){
   RTC.read(tm);
   int i=0;
@@ -295,14 +269,6 @@ void RempTab(){
 }
 
 
-void routineInterruption(){
-  if (digitalRead(PinA))
-    up = digitalRead(PinB);
-  else
-    up = !digitalRead(PinB);
-  mouvement = true;
-}
-
 void ActuRTC(){
   int Hr_temp=0, Mn_temp=0;
   Serial.print("HrBlu"); //signal pour demander l'heure
@@ -325,6 +291,10 @@ boolean Fin(){
         return 0;
     }
     return 1; 
+}
+
+void ActuPos(){
+  
 }
 
 

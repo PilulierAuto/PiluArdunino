@@ -214,13 +214,14 @@ void AddMed(int Nbr){
   digitalWrite(M2HorPin, LOW);
   digitalWrite(M2TrigPin, HIGH);
   digitalWrite(IREmmPin, HIGH);
-  ref = analogRead(IRRecPin) +42; //val à det
+  ref = analogRead(IRRecPin) -50; //val à det
 
   while(i<Nbr){
     do{
       j = analogRead(IRRecPin);
     }while(j>ref);
     Nbr++;
+    delay(100);
   }
   digitalWrite(M2HorPin, HIGH); //arrêt moteur (frein)
   delay(100);

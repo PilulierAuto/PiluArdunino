@@ -2,6 +2,7 @@
 
 
 void ActuPos(){
+  serial=0;
   String NomTemp; //INIT
   String MedStr;
   char charTemp[16];
@@ -9,12 +10,11 @@ void ActuPos(){
   EEPROM.get(0, Med);
   
   while (!Serial.available()){} //On attend que l'utilisateur entre son nom
-  if(Serial.available()){
     NomTemp=Serial.readString();
-  }
+
   NomTemp.toCharArray(charTemp, 16);
   
-  for(e=0;e<5&&d==25;e++){          //On le compare à ceux déjà existants
+  for(e=0;e<5&&d==25;e++){            //On le compare à ceux déjà existants
     if(strcmp(charTemp, Med[e].Nom)) //et on détermine qui c'est (variable d)
       d=e;
   }
@@ -25,8 +25,8 @@ void ActuPos(){
   else{                            //Le nom existe : envoi du signal OK
     Serial.write(ActuPos_Id_OK);
     while (!Serial.available()){}  //On attend  que l'utilisateur entre sa posologie
-    while (Serial.available()){
       if (Serial.read() == ActuPos_Debut){  //Signal de début de la réception
+      while (!Serial.available()){}  //On attend  que l'utilisateur entre sa posologie
         MedStr=Serial.readString();
 
         for(i=0;i<=4;i++){        //On copie les valeurs dans la structure provisoire
@@ -45,12 +45,13 @@ void ActuPos(){
           Med[d].midi[i-20]=MedStr.charAt(i)-48;
           } 
         EEPROM.put(0, Med);     //On rentre dans la mémoire EEProm
-        }
     }
-  }    
+  }
+ serial = 1;    
 }
 
 void ActuRTC(){
+  serial=0;
   int Hr_temp=0, Mn_temp=0;
   while(Hr_temp<=0)
     Hr_temp=Serial.parseInt();
@@ -61,4 +62,5 @@ void ActuRTC(){
     setTime(Hr_temp, Mn_temp, tm.Second, tm.Day, tm.Month, tm.Year);
     RTC.set(now());
   }
+  serial=1;
 }

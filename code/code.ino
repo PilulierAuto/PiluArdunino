@@ -19,6 +19,7 @@
 
 volatile boolean mouvement;
 volatile boolean up;
+volatile boolean serial;
 
 /* Moteurs (l298n) M1:Rotation plateau M2:Montée médicaments*/
 const int M1HorPin = 7;   //IN1
@@ -98,6 +99,7 @@ void loop() {
 }
 
 void SerialEvent(){
+  if(Serial){
    byte ReadVar = Serial.read();
    switch(ReadVar){
     case Mes_Actu:
@@ -107,6 +109,7 @@ void SerialEvent(){
       ActuPos();
       break;
    }
+  }   
 }
 
 

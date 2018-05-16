@@ -277,9 +277,9 @@ void RempTab(){
 
 void ActuRTC(){
   int Hr_temp=0, Mn_temp=0;
-  while(Hr_temp==0)
+  while(Hr_temp<=0)
     Hr_temp=Serial.parseInt();
-  while(Mn_temp==0)
+  while(Mn_temp<=0)
     Mn_temp=Serial.parseInt();
   RTC.read(tm);
   if(tm.Hour!=Hr_temp || tm.Minute!=Mn_temp){
@@ -299,8 +299,8 @@ boolean Fin(){
 }
 
 void ActuPos(){
-  char NomTemp[16]; //INIT
-  char charTemp=-1;
+  String NomTemp; //INIT
+  char charTemp[16];
   byte f=0, e=0, d=25, i=0;
   unsigned short mat[5];
   unsigned short midi[5];
@@ -310,17 +310,13 @@ void ActuPos(){
   EEPROM.get(0, Med);
   
   while (!Serial.available()){} //On attend que l'utilisateur entre son nom
-  while (Serial.available()){   //On rentre le nom d'utilisateur
-    if(f<15){
-      charTemp=Serial.read();
-      NomTemp[f]=charTemp;
-      f++;
-      NomTemp[f]='\0';
-    }
+  if(Serial.available()){
+    NomTemp=Serial.readString();
   }
+  NomTemp.toCharArray(charTemp, 16);
   
   for(e=0;e<5&&d==25;e++){          //On le compare à ceux déjà existants
-    if(strcmp(NomTemp, Med[e].Nom)) //et on détermine qui c'est (variable d)
+    if(strcmp(charTemp, Med[e].Nom)) //et on détermine qui c'est (variable d)
       d=e;
   }
 

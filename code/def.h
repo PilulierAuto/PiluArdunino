@@ -25,10 +25,9 @@ byte Cust5 [8] = {0b00000, 0b01111, 0b01111, 0b00001, 0b11110, 0b11110, 0b01110,
 const byte Mes_Recu = 0xFF;
 const byte Mes_Actu = 0x1;
 const byte Mes_DemPos = 0x3;
-const byte ActuPos_Id1 = 0x4;
-const byte ActuPos_Id2 = 0x5;
-const byte ActuPos_Id3 = 0x6;
-const byte ActuPos_Id4 = 0x7;
-const byte ActuPos_Id5 = 0x8;
+
+const byte ActuPos_Id_err = 0x4;
+const byte ActuPos_Id_OK = 0x5;
+const byte ActuPos_Debut = 0x6;
 
 

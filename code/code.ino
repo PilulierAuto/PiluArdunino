@@ -113,8 +113,8 @@ void SerialEvent(){
 void RotPlat(){
   boolean fin=Fin();
   int temp = 0;
-  analogWrite(M1Pwm, 64); 
   if((MedSeq[(PosPlat+1)%5]!=0 && PosPlat+1<=4) || fin&&PosPlat==4){
+    analogWrite(M1Pwm, 45);
     digitalWrite(M1HorPin, HIGH);
     digitalWrite(M1TrigPin, LOW);
     delay(100);
@@ -135,6 +135,7 @@ void RotPlat(){
       PosPlat=0;
   }
   else if(MedSeq[(PosPlat+2)%5]!=0 && PosPlat+2<=4 || fin&&PosPlat==3){
+    analogWrite(M1Pwm, 100);
     digitalWrite(M1HorPin, HIGH);
     digitalWrite(M1TrigPin, LOW);
     delay(100);
@@ -143,6 +144,7 @@ void RotPlat(){
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
     delay(200);
+    analogWrite(M1Pwm, 45);
     do{
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
@@ -157,7 +159,8 @@ void RotPlat(){
     PosPlat+=2;
   }
     else if(MedSeq[(PosPlat+3)%5]!=0 && PosPlat+3<=4 || fin&&PosPlat==2){
-     digitalWrite(M1HorPin, HIGH);
+    analogWrite(M1Pwm, 100);
+    digitalWrite(M1HorPin, HIGH);
     digitalWrite(M1TrigPin, LOW);
     delay(100);
   
@@ -168,6 +171,7 @@ void RotPlat(){
     do{
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
+    analogWrite(M1Pwm, 45);
     do{
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
@@ -181,6 +185,7 @@ void RotPlat(){
     PosPlat+=3;
   }
   else if(MedSeq[(PosPlat+4)%5]!=0 && PosPlat+4<=4 || fin&&PosPlat==1){
+    analogWrite(M1Pwm, 45);
       digitalWrite(M1HorPin, HIGH);
     digitalWrite(M1TrigPin, LOW);
     delay(100);
@@ -197,6 +202,7 @@ void RotPlat(){
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
     delay(200);
+    analogWrite(M1Pwm, 100);
     do{
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
@@ -294,6 +300,76 @@ boolean Fin(){
 }
 
 void ActuPos(){
+  char NomTemp[16];
+  char charTemp=-1;
+  byte f=0, e=0, d=25, i=0;
+  unsigned short mat[5];
+  unsigned short midi[5];
+  unsigned short soir[5];
+  unsigned short nuit[5];
+  unsigned short aco[5]; //au cas où 
+  EEPROM.get(0, Med);
+  while (!Serial.available()){}
+  while (Serial.available()){
+    if(f<15){
+      charTemp=Serial.read();
+      NomTemp[f]=charTemp;
+      f++;
+      NomTemp[f]='\0';
+    }
+  }
+  
+  for(e=0;e<5&&d==25;e++){
+    if(strcmp(NomTemp, Med[e].Nom))
+      d=e;
+  }
+
+  if(d==25){
+    Serial.print(ActuPos_Id_err);
+  }
+  else{
+    Serial.print(ActuPos_Id_OK);
+    while (!Serial.available()){}
+    while (Serial.available()){
+      if (Serial.read() == ActuPos_Debut){
+        mat[0]=Serial.read();
+        mat[1]=Serial.read();
+        mat[2]=Serial.read();
+        mat[3]=Serial.read();
+        mat[4]=Serial.read();
+        midi[0]=Serial.read();
+        midi[1]=Serial.read();
+        midi[2]=Serial.read();
+        midi[3]=Serial.read();
+        midi[4]=Serial.read();
+        soir[0]=Serial.read();
+        soir[1]=Serial.read();
+        soir[2]=Serial.read();
+        soir[3]=Serial.read();
+        soir[4]=Serial.read();
+        nuit[0]=Serial.read();
+        nuit[1]=Serial.read();
+        nuit[2]=Serial.read();
+        nuit[3]=Serial.read();
+        nuit[4]=Serial.read();
+        aco[0]=Serial.read();
+        aco[1]=Serial.read();
+        aco[2]=Serial.read();
+        aco[3]=Serial.read();
+        aco[4]=Serial.read();
+
+        for(i=0;i<=4;i++){
+          Med[d].mat[i]=mat[i];
+          Med[d].midi[i]=midi[i];
+          Med[d].soir[i]=soir[i];
+          Med[d].nuit[i]=nuit[i];
+          Med[d].aco[i]=aco[i];
+          }
+        EEPROM.put(0, Med);
+        }
+    }
+  }
+  
   
 }
 

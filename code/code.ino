@@ -277,7 +277,6 @@ void RempTab(){
 
 void ActuRTC(){
   int Hr_temp=0, Mn_temp=0;
-  Serial.print("HrBlu"); //signal pour demander l'heure
   while(Hr_temp==0)
     Hr_temp=Serial.parseInt();
   while(Mn_temp==0)
@@ -300,17 +299,18 @@ boolean Fin(){
 }
 
 void ActuPos(){
-  char NomTemp[16];
+  char NomTemp[16]; //INIT
   char charTemp=-1;
   byte f=0, e=0, d=25, i=0;
   unsigned short mat[5];
   unsigned short midi[5];
   unsigned short soir[5];
   unsigned short nuit[5];
-  unsigned short aco[5]; //au cas où 
+  unsigned short aco[5];
   EEPROM.get(0, Med);
-  while (!Serial.available()){}
-  while (Serial.available()){
+  
+  while (!Serial.available()){} //On attend que l'utilisateur entre son nom
+  while (Serial.available()){   //On rentre le nom d'utilisateur
     if(f<15){
       charTemp=Serial.read();
       NomTemp[f]=charTemp;
@@ -319,20 +319,20 @@ void ActuPos(){
     }
   }
   
-  for(e=0;e<5&&d==25;e++){
-    if(strcmp(NomTemp, Med[e].Nom))
+  for(e=0;e<5&&d==25;e++){          //On le compare à ceux déjà existants
+    if(strcmp(NomTemp, Med[e].Nom)) //et on détermine qui c'est (variable d)
       d=e;
   }
 
-  if(d==25){
+  if(d==25){                        //Le nom n'existe pas : envoi du signal d'erreur et fin
     Serial.print(ActuPos_Id_err);
   }
-  else{
+  else{                            //Le nom existe : envoi du signal OK
     Serial.print(ActuPos_Id_OK);
-    while (!Serial.available()){}
+    while (!Serial.available()){}  //On attend  que l'utilisateur entre sa posologie
     while (Serial.available()){
-      if (Serial.read() == ActuPos_Debut){
-        mat[0]=Serial.read();
+      if (Serial.read() == ActuPos_Debut){  //Signal de début de la réception
+        mat[0]=Serial.read();               //On reçoit chaque valeur une à une
         mat[1]=Serial.read();
         mat[2]=Serial.read();
         mat[3]=Serial.read();
@@ -358,14 +358,14 @@ void ActuPos(){
         aco[3]=Serial.read();
         aco[4]=Serial.read();
 
-        for(i=0;i<=4;i++){
+        for(i=0;i<=4;i++){        //On copie les valeurs dans la structure provisoire
           Med[d].mat[i]=mat[i];
           Med[d].midi[i]=midi[i];
           Med[d].soir[i]=soir[i];
           Med[d].nuit[i]=nuit[i];
           Med[d].aco[i]=aco[i];
           }
-        EEPROM.put(0, Med);
+        EEPROM.put(0, Med);     //On rentre dans la mémoire EEProm
         }
     }
   }

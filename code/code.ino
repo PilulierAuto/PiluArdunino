@@ -73,6 +73,15 @@ void setup() {
   digitalWrite (PinA, HIGH);
   digitalWrite (PinB, HIGH);
   attachInterrupt (0, routineInterruption, FALLING);
+
+  pinMode(M1TrigPin, OUTPUT);
+  pinMode(M1HorPin, OUTPUT);
+  pinMode(M1Pwm, OUTPUT);
+  pinMode(M2TrigPin, OUTPUT);
+  pinMode(M2HorPin, OUTPUT);
+  pinMode(M2Pwm, OUTPUT);
+
+  pinMode(CptCtcPin, INPUT);
   
    //------------------------------*MENU*----------------------------
   Lcd.createChar(0, Cust1);
@@ -99,7 +108,7 @@ void loop() {
 }
 
 void SerialEvent(){
-  if(Serial){
+  if(serial){
    byte ReadVar = Serial.read();
    switch(ReadVar){
     case Mes_Actu:

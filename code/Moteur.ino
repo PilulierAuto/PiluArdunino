@@ -60,6 +60,7 @@ void RotPlat(){
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
     analogWrite(M1Pwm, 45);
+    delay(200);
     do{
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
@@ -73,7 +74,7 @@ void RotPlat(){
     PosPlat+=3;
   }
   else if(MedSeq[(PosPlat+4)%5]!=0 && PosPlat+4<=4 || fin&&PosPlat==1){
-    analogWrite(M1Pwm, 45);
+    analogWrite(M1Pwm, 100);
       digitalWrite(M1HorPin, HIGH);
     digitalWrite(M1TrigPin, LOW);
     delay(100);
@@ -89,6 +90,7 @@ void RotPlat(){
     do{
       temp = digitalRead(CptCtcPin); 
     }while(temp==0);
+    analogWrite(M1Pwm, 100);
     delay(200);
     analogWrite(M1Pwm, 100);
     do{
@@ -119,7 +121,7 @@ void AddMed(int Nbr){
     do{
       j = analogRead(IRRecPin);
     }while(j>ref);
-    Nbr++;
+    i++;
     delay(100);
   }
   digitalWrite(M2HorPin, HIGH); //arrêt moteur (frein)

@@ -1,3 +1,12 @@
+/******************
+ * Moteur.ino
+ * Fonctions pour la mise en marche des moteurs
+ * 
+ * Dernière modification : 21/5/18
+ */
+
+
+
 void RotPlat(){
   boolean fin=Fin();
   int temp = 0;
@@ -109,6 +118,7 @@ void RotPlat(){
 }
 
 void AddMed(int Nbr){
+  if(Nbr!=0){
   int i = 0, j = 0, ref = 0;
 
   analogWrite(M2Pwm, 255); 
@@ -137,6 +147,7 @@ void AddMed(int Nbr){
   digitalWrite(M2HorPin, LOW);
   digitalWrite(M2TrigPin, LOW);
   MedSeq[PosPlat]=0;
+  }
 }
 
 void RempTab(){

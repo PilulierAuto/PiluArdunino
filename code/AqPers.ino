@@ -1,3 +1,12 @@
+/******************
+ * AqPers.ino
+ * Sélection de la personne
+ * 
+ * Dernière modification : 21/5/18
+ */
+
+
+
 int AqPers(){
   Lcd.print("Bonjour");
   while(!Serial.available() > 0){

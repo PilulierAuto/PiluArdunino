@@ -1,4 +1,9 @@
-
+/******************
+ * Actu.ino
+ * Fonctions d'actualisation de l'heure de la posologie
+ * 
+ * Dernière modification : 21/5/18
+ */
 
 
 void ActuPos(){

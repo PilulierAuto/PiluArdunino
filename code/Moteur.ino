@@ -11,14 +11,14 @@ void RotPlat(){
   boolean fin=Fin();
   int temp = 0;
   if((MedSeq[(PosPlat+1)%5]!=0 && PosPlat+1<=4) || fin&&PosPlat==4){
-    analogWrite(M1Pwm, 45);
+    analogWrite(M1Pwm, 52);
     digitalWrite(M1HorPin, HIGH);
     digitalWrite(M1TrigPin, LOW);
     delay(100);
   
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
   
     digitalWrite(M1HorPin, HIGH); //arrêt moteur (frein)
     delay(100);
@@ -39,12 +39,12 @@ void RotPlat(){
   
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
     delay(200);
-    analogWrite(M1Pwm, 45);
+    analogWrite(M1Pwm, 52);
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
     
   
     digitalWrite(M1HorPin, HIGH); //arrêt moteur (frein)
@@ -63,16 +63,16 @@ void RotPlat(){
   
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
     delay(200);
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
-    analogWrite(M1Pwm, 45);
+    }while(temp==1);
+    analogWrite(M1Pwm, 52);
     delay(200);
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
     
     digitalWrite(M1HorPin, HIGH); //arrêt moteur (frein)
     delay(100);
@@ -90,21 +90,20 @@ void RotPlat(){
   
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
     delay(200);
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
     delay(200);
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
-    analogWrite(M1Pwm, 100);
+    }while(temp==1);
     delay(200);
-    analogWrite(M1Pwm, 100);
+    analogWrite(M1Pwm, 52);
     do{
       temp = digitalRead(CptCtcPin); 
-    }while(temp==0);
+    }while(temp==1);
     
     digitalWrite(M1HorPin, HIGH); //arrêt moteur (frein)
     delay(100);

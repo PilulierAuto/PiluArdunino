@@ -47,7 +47,7 @@ void ActuPos(){
           Med[d].nuit[i-15]=MedStr.charAt(i)-48;
           } 
         for(i=20;i<=24;i++){        //On copie les valeurs dans la structure provisoire
-          Med[d].midi[i-20]=MedStr.charAt(i)-48;
+          Med[d].aco[i-20]=MedStr.charAt(i)-48;
           } 
         EEPROM.put(0, Med);     //On rentre dans la mémoire EEProm
     }

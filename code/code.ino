@@ -35,6 +35,7 @@ const int IREmmPin = 13, IRRecPin = A0;
 
 /*Capteur contact*/
 const int CptCtcPin = A2; 
+const int CptFinCoursePin = A3;
 
 /*Boutons*/
 const int BtnPin = A1; 
@@ -82,6 +83,7 @@ void setup() {
   pinMode(M2Pwm, OUTPUT);
 
   pinMode(CptCtcPin, INPUT);
+  pinMode(CptFinCoursePin, INPUT);
   
    //------------------------------*MENU*----------------------------
   Lcd.createChar(0, Cust1);
